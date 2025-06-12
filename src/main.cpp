@@ -1,70 +1,23 @@
-// Libs externas
 #include <Arduino.h>
-#include <WiFi.h>
-#include <PubSubClient.h>
-
-// Libs locais
-#include "system_defs.h"
-
-
-// Dados da rede Wi-Fi
-const char* ssid = "SUA_REDE_WIFI";
-const char* password = "SUA_SENHA_WIFI";
-
-// Endereço do broker MQTT (test.mosquitto.org é um público)
-const char* mqtt_server = "test.mosquitto.org";
-
-WiFiClient espClient;
-PubSubClient client(espClient);
-
-void setup_wifi() {
-  delay(10);
-  Serial.println();
-  Serial.print("Conectando-se a: ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-
-  // Aguarda conexão
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print(".");
-  }
-
-  Serial.println("\nWiFi conectado com sucesso!");
-  Serial.print("Endereço IP: ");
-  Serial.println(WiFi.localIP());
-}
-
-void reconnect_mqtt() {
-  // Tenta conectar até conseguir
-  while (!client.connected()) {
-    Serial.print("Conectando ao broker MQTT...");
-    String clientId = "ESP32Cliente-";
-    clientId += String(random(0xffff), HEX); // ID único
-
-    if (client.connect(clientId.c_str())) {
-      Serial.println("Conectado ao MQTT!");
-      // Aqui você pode subscrever a tópicos, se quiser
-    } else {
-      Serial.print("Falha. Código: ");
-      Serial.print(client.state());
-      Serial.println(" Tentando novamente em 2 segundos...");
-      delay(2000);
-    }
-  }
-}
+#include "network.h"
 
 void setup() {
   Serial.begin(115200);
-  setup_wifi();
-  client.setServer(mqtt_server, 1883); // Porta padrão do MQTT
+
+  // Inicializa Wi-Fi e configura cliente MQTT
+  initNetwork();
+
+  // Pode adicionar inicializações futuras aqui (ex: API de pedidos)
 }
 
 void loop() {
-  if (!client.connected()) {
-    reconnect_mqtt();
-  }
-  client.loop(); // Mantém a conexão ativa
+  // Garante reconexão MQTT, caso perca
+  ensureMqttConnection();
+
+  // Mantém comunicação MQTT funcionando
+  mqttClient.loop();
+
+  // Pode adicionar chamadas de tarefas (ex: verificar botões ou mensagens recebidas)
 }
+
 
