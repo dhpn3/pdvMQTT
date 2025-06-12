@@ -1,6 +1,11 @@
+// Libs externas
 #include <Arduino.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+
+// Libs locais
+#include "system_defs.h"
+
 
 // Dados da rede Wi-Fi
 const char* ssid = "SUA_REDE_WIFI";
